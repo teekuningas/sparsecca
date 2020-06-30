@@ -3,40 +3,9 @@
 import numpy as np
 from scipy.linalg import svd
 
-
-def l2n(vec):
-    """ computes "safe" l2 norm """
-    norm = np.sqrt(np.sum(vec**2))
-    if norm == 0:
-        norm = 0.05
-    return norm
-
-
-def binary_search(argu, sumabs):
-    """ 
-    """
-    if l2n(argu) == 0 or np.sum(np.abs(argu/l2n(argu))) <= sumabs:
-        return 0 
-
-    lam1 = 0
-    lam2 = np.max(np.abs(argu)) - 1e-5
-
-    for idx in range(150):
-        su = soft(argu, (lam1 + lam2) / 2)
-        if np.sum(np.abs(su/l2n(su))) < sumabs:
-            lam2 = (lam1 + lam2) / 2
-        else:
-            lam1 = (lam1 + lam2) / 2
-        if lam2 - lam1 < 1e-6:
-            return (lam1 + lam2) / 2
-
-    print("Warning. Binary search did not quite converge..")
-    return (lam1 + lam2) / 2
-
-
-def soft(x_, d_):
-    """ soft-thresholding operator """
-    return np.sign(x_) * (np.abs(x_)-d_).clip(min=0)
+from ._utils import soft
+from ._utils import l2n
+from ._utils import binary_search
 
 
 def sparse_cca(x_, z_, v_, penaltyx, penaltyz, niter):
@@ -76,9 +45,9 @@ def sparse_cca(x_, z_, v_, penaltyx, penaltyz, niter):
 
 
 def cca_algorithm(x_, z_, v_, penaltyx, penaltyz, K, niter):
+    """ implements the biconvex optimization algorithm for finding u and v
     """
-    """
-    U, V, D = [], [], []
+    us, vs, ds = [], [], []
 
     xres = x_
     zres = z_
@@ -88,23 +57,24 @@ def cca_algorithm(x_, z_, v_, penaltyx, penaltyz, K, niter):
                              niter)
 
         coef = results[2]
-        D.append(coef)
+        ds.append(coef)
 
         xres = np.vstack([xres, np.sqrt(coef)*results[0]])
         zres = np.vstack([zres, -np.sqrt(coef)*results[1]])
 
-        U.append(results[0])
-        V.append(results[1])
+        us.append(results[0])
+        vs.append(results[1])
 
-    U = np.array(U)
-    V = np.array(V)
+    U = np.array(us).T
+    V = np.array(vs).T
+    D = np.diag(ds)
 
     return U, V, D
 
 
-def cca(x_, z_, penaltyx=0.9, penaltyz=0.9, K=1, niter=15, 
+def cca(x_, z_, penaltyx=0.9, penaltyz=0.9, K=1, niter=20, 
         standardize=True):
-    """
+    """ given x and z datasets, computes canonical weights
     """
     if x_.shape[1] < 2:
         raise Exception('Need at least two features in dataset x')
@@ -117,6 +87,10 @@ def cca(x_, z_, penaltyx=0.9, penaltyz=0.9, K=1, niter=15,
         x_ = x_ - np.mean(x_, axis=0)
         z_ = z_ - np.mean(z_, axis=0)
 
+    if np.abs(np.mean(x_)) > 1e-10 or np.abs(np.mean(z_)) > 1e-10:
+        print("Warning, cca was run without first subtracting "
+              "out the means of the data matrices.")
+
     if penaltyx < 0 or penaltyx > 1:
         raise Exception('Penaltyx must be be between 0 and 1')
 
@@ -128,49 +102,4 @@ def cca(x_, z_, penaltyx=0.9, penaltyz=0.9, K=1, niter=15,
 
     result = cca_algorithm(x_, z_, v_, penaltyx, penaltyz, K, niter)
     return result
-
-
-if __name__ == '__main__':
-    """
-    """
-    random_state = np.random.RandomState(20)
-    
-    # simulate datasets X and Z with common factor
-    y = np.array([1, 6, 8, 3, 9, 3, 2, 1, 1, 4, 7, 10, 15, 10, 7])
-    x1 = np.array([random_state.normal() for idx in range(len(y))])
-    x2 = np.array([random_state.normal() for idx in range(len(y))])
-    x3 = np.array([random_state.normal() for idx in range(len(y))])
-    z1 = np.array([random_state.normal() for idx in range(len(y))])
-    z2 = np.array([random_state.normal() for idx in range(len(y))])
-    z3 = np.array([random_state.normal() for idx in range(len(y))])
-    z4 = np.array([random_state.normal() for idx in range(len(y))])
-    x1, x2 = x1 + y, x2 + y
-    z2, z3 = z2 - y, z3 + y
-    X = np.array([x1, x2, x3])
-    Z = np.array([z1, z2, z3, z4])
-
-    print("Use standard CCA from statsmodels")
-    from statsmodels.multivariate.cancorr import CanCorr
-    print("statsmodels CCA: ")
-    stats_cca = CanCorr(Z.T, X.T)
-
-    print(stats_cca.corr_test().summary())
-    print("X weights: ")
-    print(stats_cca.x_cancoef)
-    print("Z weights: ")
-    print(stats_cca.y_cancoef)
-
-    print("Use CCA by PMD")
-    results = cca(X.T, Z.T, penaltyx=1.0, penaltyz=1.0, K=3, standardize=True)
-
-    for idx in range(len(results[2])):
-        x_weights = results[0][idx]
-        z_weights = results[1][idx]
-        corrcoef = np.corrcoef(np.dot(x_weights, X), np.dot(z_weights, Z))[0, 1]
-        print("Corrcoef for comp " + str(idx+1) + ": " + str(corrcoef))
-
-    print("X weights: ")
-    print(results[0].T)
-    print("Z weights: ")
-    print(results[1].T)
 
