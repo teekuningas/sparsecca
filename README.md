@@ -1,6 +1,10 @@
 ## pypma
 
-Python implementations for PMA algorithms based on Witten et al, 2009 and the corresponding R package PMA. Currently includes PMD (Penalized Matrix Decomposition) and PMD-based (i.e sparse) CCA. An example is included in the examples folder.
+Python implementations for PMA algorithms based on Witten et al, 2009 and the corresponding R package PMA. Includes:
+
+* Penalized Matrix Decomposition (PMD), which is a version of Singular Value Decomposition (X = UDV^T), where U and V can be penalized to be sparse.
+
+* A dedicated efficient algorithm for computing Sparse CCA (that is equivalent to computing PMD with X.T @ Z, where X and Z are two observation matrices with same amount of observations).
 
 ### Installation
 
