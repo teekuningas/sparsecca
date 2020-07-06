@@ -1,13 +1,20 @@
 ## pypma
 
-Python implementations for PMA algorithms based on Witten et al, 2009 and the corresponding R package PMA. Includes:
+Python implementations for Sparse CCA algorithms. Includes:
 
-* Penalized Matrix Decomposition (PMD), which is a version of Singular Value Decomposition (X = U @ D @ V.T), where U and V can be penalized to be sparse.
-
-* A dedicated efficient algorithm for computing Sparse CCA (that is equivalent to computing PMD with X.T @ Z, where X and Z are two observation matrices with same amount of observations).
+* Sparse (multiple) CCA based on Penalized Matrix Decomposition (PMD) from Witten et al, 2009. 
+* Sparse CCA based on Iterative Penalized Least Squares from Mai et al, 2009.
 
 ### Installation
 
+#### Install glmnet from source
+git clone https://github.com/bbalasub1/glmnet\_python.git
+cd glmnet\_python
+python setup.py install
+
+#### install this package from source
+git clone https://github.com/Teekuningas/sparsecca.git
+cd sparsecca
 python setup.py install
 
 ### Usage
@@ -16,4 +23,4 @@ See examples.
 
 ### Acknowledgements
 
-Great thanks to the original authors, see https://cran.r-project.org/web/packages/PMA/index.html
+Great thanks to the original authors, see Witten et al, 2009 and Mai et al, 2019.

@@ -3,9 +3,9 @@
 import numpy as np
 from scipy.linalg import svd
 
-from ._utils import soft
-from ._utils import l2n
-from ._utils import binary_search
+from ._utils_pmd import soft
+from ._utils_pmd import l2n
+from ._utils_pmd import binary_search
 
 
 def smd(x_, sumabsu, sumabsv, niter, v_):

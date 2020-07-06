@@ -5,9 +5,10 @@ import numpy as np
 from numpy.linalg import svd
 from statsmodels.multivariate.cancorr import CanCorr
 
-from pypma import cca
-from pypma import multicca
-from pypma import pmd
+from sparsecca import cca_ipls
+from sparsecca import cca_pmd
+from sparsecca import multicca_pmd
+from sparsecca import pmd
 
 
 random_state = np.random.RandomState(15)
@@ -39,6 +40,10 @@ X = X - np.mean(X, axis=0)
 Y = Y - np.mean(Y, axis=0)
 Z = Z - np.mean(Z, axis=0)
 
+X = np.round(X, 3)
+Y = np.round(Y, 3)
+Z = np.round(Z, 3)
+
 print("Use standard CCA from statsmodels")
 stats_cca = CanCorr(Z, X)
 
@@ -48,8 +53,8 @@ print(stats_cca.x_cancoef)
 print("Z weights: ")
 print(stats_cca.y_cancoef)
 
-print("Use dedicated CCA method from this package (no need to compute X.T @ Z)")
-U, V, D = cca(X, Z, penaltyx=1.0, penaltyz=1.0, K=3, standardize=False)
+print("Use dedicated CCA algorithm from Witten et al (no need to compute X.T @ Z)")
+U, V, D = cca_pmd(X, Z, penaltyx=1.0, penaltyz=1.0, K=2, standardize=False)
 
 for idx in range(U.shape[1]):
     x_weights = U[:, idx]
@@ -77,7 +82,7 @@ print("Z weights: ")
 print(V.T)
 
 print("Use PMD of X.T @ Z to compute CCA (should match the svd")
-U, V, D = pmd(X.T @ Z, K=3, penaltyu=0.9, penaltyv=0.9, standardize=False)
+U, V, D = pmd(X.T @ Z, K=2, penaltyu=1.0, penaltyv=1.0, standardize=False)
 
 for idx in range(U.shape[1]):
     x_weights = U[:, idx]
@@ -91,7 +96,7 @@ print("Z weights: ")
 print(V)
 
 print("Use PMD of X.T @ Z to compute CCA (with penalty)")
-U, V, D = pmd(X.T @ Z, K=3, penaltyu=0.9, penaltyv=0.9, standardize=False)
+U, V, D = pmd(X.T @ Z, K=2, penaltyu=0.9, penaltyv=0.9, standardize=False)
 
 for idx in range(U.shape[1]):
     x_weights = U[:, idx]
@@ -105,7 +110,7 @@ print("Z weights: ")
 print(V)
 
 print("Use PMD-based CCA for multiple datasets")
-X_weights, Y_weights, Z_weights = multicca(
+X_weights, Y_weights, Z_weights = multicca_pmd(
     [X, Y, Z], penalties=[0.8, 0.6, 0.7], K=2, standardize=False)
 
 print("X weights")
@@ -115,3 +120,11 @@ print(Y_weights)
 print("Z weights")
 print(Z_weights)
 
+print("Use CCA based on iterative penalized least squares")
+X_weights, Z_weights = cca_ipls(X, Z, alpha_lambda=0.1, beta_lambda=0.1, standardize=True,
+                                n_pairs=2)
+
+print("X weights")
+print(X_weights)
+print("Z weights")
+print(Z_weights)

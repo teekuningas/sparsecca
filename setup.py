@@ -1,14 +1,14 @@
 from setuptools import setup
 
 setup(
-    name='pypma',
+    name='sparsecca',
     version='0.1.0',
-    description="Implements Witten et al. 2009 in python",
+    description="",
     author='Erkka Heinila',
     author_email='erkka.heinila@jyu.fi',
     license='BSD',
-    packages=['pypma'],
-    keywords='pma cca pmd svd',
+    packages=['sparsecca'],
+    keywords='pma cca pmd sparse svd',
     install_requires=[
         'setuptools',
     ],
