@@ -104,7 +104,6 @@ def scca(x, y, alpha_lambda, beta_lambda, niter=100, n_pairs=1,
 
     alpha = np.zeros((y.shape[1], n_pairs))
     beta = np.zeros((x.shape[1], n_pairs))
-    rho = np.zeros((n_pairs, n_pairs))
 
     alpha_init, beta_init = init0(sigma_YX_hat, sigma_X_hat, sigma_Y_hat, 
                                   n_pairs)
