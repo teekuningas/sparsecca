@@ -1,4 +1,4 @@
-## pypma
+## sparsecca
 
 Python implementations for Sparse CCA algorithms. Includes:
 
