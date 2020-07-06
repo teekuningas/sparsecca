@@ -8,8 +8,8 @@ Python implementations for Sparse CCA algorithms. Includes:
 ### Installation
 
 #### Install glmnet from source
-git clone https://github.com/bbalasub1/glmnet\_python.git
-cd glmnet\_python
+git clone https://github.com/bbalasub1/glmnet_python.git
+cd glmnet_python
 python setup.py install
 
 #### install this package from source
