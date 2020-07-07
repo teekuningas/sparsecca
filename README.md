@@ -9,12 +9,11 @@ One main difference between these two is that while the first is very simple it 
 
 ### Installation
 
-#### Install glmnet from source
-git clone https://github.com/bbalasub1/glmnet_python.git  
-cd glmnet_python  
-python setup.py install
+#### Dependencies
 
-#### install this package from source
+In addition to basic scientific packages such as numpy and scipy, iterative penalized least squares needs either glmnet_python or pyglmnet to be installed.
+
+#### This package can be installed normally with
 git clone https://github.com/Teekuningas/sparsecca.git  
 cd sparsecca  
 python setup.py install

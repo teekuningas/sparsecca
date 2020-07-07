@@ -121,8 +121,8 @@ print("Z weights")
 print(Z_weights)
 
 print("Use CCA based on iterative penalized least squares")
-X_weights, Z_weights = cca_ipls(X, Z, alpha_lambda=0.1, beta_lambda=0.1, standardize=True,
-                                n_pairs=2)
+X_weights, Z_weights = cca_ipls(X, Z, alpha_lambda=0.0, beta_lambda=0.0, standardize=True,
+                                n_pairs=2, glm_impl='pyglmnet')
 
 print("X weights")
 print(X_weights)

@@ -3,8 +3,6 @@
 import numpy as np
 from scipy.linalg import svd
 
-from glmnet_python import glmnet
-
 
 def init0(sigma_YX_hat, sigma_X_hat, sigma_Y_hat, n_pairs):
     """ supports only initialization by svd """
@@ -35,21 +33,26 @@ def find_omega(sigma_YX_hat, idx_pairs,
     return omega
 
 
-def scca_solution(x, y, x_omega, y_omega,
-                  alpha0, beta0, alpha_lambda, beta_lambda,
-                  niter, eps):
+def scca_solution(x, y, x_omega, y_omega, alpha0, beta0, 
+                  alpha_lambda_ratio, beta_lambda_ratio, 
+                  alpha_lambda, beta_lambda, niter, eps, glm_impl):
     """ computes one pair of canonical weights
     """
     for idx in range(niter):
         x0 = x_omega @ beta0
 
-        lambda_a = np.array([alpha_lambda])
-        lambda_b = np.array([beta_lambda])
-
-        m_ = glmnet(x=y.copy(), y=x0.copy(), standardize=False, intr=False, 
-                    family='gaussian', lambdau=lambda_a)
-
-        alpha1 = m_['beta'][:, -1]
+        if glm_impl == 'glmnet_python':
+            from glmnet_python import glmnet
+            lambda_a = np.array([alpha_lambda])
+            m_ = glmnet(x=y.copy(), y=x0.copy(), standardize=False, intr=False, 
+                        family='gaussian', lambdau=lambda_a)
+            alpha1 = m_['beta'][:, -1]
+        elif glm_impl == 'pyglmnet':
+            from pyglmnet import GLM
+            alpha1 = GLM(distr='gaussian', alpha=alpha_lambda_ratio, reg_lambda=alpha_lambda,
+                         fit_intercept=False).fit(y.copy(), x0.copy()).beta_
+        else:
+            raise Exception(str(glm_impl) + ' not supported.')
 
         if np.sum(np.abs(alpha1)) < eps: 
             alpha0 = [0]*y.shape[1]
@@ -62,10 +65,20 @@ def scca_solution(x, y, x_omega, y_omega,
 
         y0 = y_omega @ alpha1
 
-        m_ = glmnet(x=x.copy(), y=y0.copy(), standardize=False, intr=False, 
-                    family='gaussian', lambdau=lambda_b)
+        if glm_impl == 'glmnet_python':
+            from glmnet_python import glmnet
+            lambda_b = np.array([beta_lambda])
+            m_ = glmnet(x=x.copy(), y=y0.copy(), standardize=False, intr=False, 
+                        family='gaussian', lambdau=lambda_b)
+            beta1 = m_['beta'][:, -1]
+        elif glm_impl == 'pyglmnet':
+            from pyglmnet import GLM
+            beta1 = GLM(distr='gaussian', alpha=beta_lambda_ratio, reg_lambda=beta_lambda,
+                         fit_intercept=False).fit(x.copy(), y0.copy()).beta_
+        else:
+            raise Exception(str(glm_impl) + ' not supported.')
 
-        beta1 = m_['beta'][:, -1]
+
 
         if np.sum(np.abs(beta1)) < eps:
             beta0 = [0]*x.shape[1]
@@ -85,8 +98,9 @@ def scca_solution(x, y, x_omega, y_omega,
     return alpha0, beta0
 
 
-def scca(x, y, alpha_lambda, beta_lambda, niter=100, n_pairs=1, 
-         standardize=True, eps=1e-4):
+def scca(x, y, alpha_lambda_ratio=1.0, beta_lambda_ratio=1.0,
+         alpha_lambda=0.05, beta_lambda=0.05, niter=100, n_pairs=1, 
+         standardize=True, eps=1e-4, glm_impl='pyglmnet'):
     """ compute penalized canonical weights for x (n_obs, n_features) and 
     y (n_obs, n_features).
     """
@@ -123,9 +137,12 @@ def scca(x, y, alpha_lambda, beta_lambda, niter=100, n_pairs=1,
 
         results = scca_solution(x=x, y=y, x_omega=x_tmp, y_omega=y_tmp,
                                 alpha0=alpha0, beta0=beta0,
+                                alpha_lambda_ratio=alpha_lambda_ratio,
+                                beta_lambda_ratio=beta_lambda_ratio,
                                 alpha_lambda=alpha_lambda, 
                                 beta_lambda=beta_lambda,
-                                niter=niter, eps=eps)
+                                niter=niter, eps=eps,
+                                glm_impl=glm_impl)
 
         alpha[:, idx_pairs] = results[0]
         beta[:, idx_pairs] = results[1]
