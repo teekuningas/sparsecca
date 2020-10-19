@@ -45,7 +45,8 @@ def scca_solution(x, y, x_omega, y_omega, alpha0, beta0,
             from glmnet_python import glmnet
             lambda_a = np.array([alpha_lambda])
             m_ = glmnet(x=y.copy(), y=x0.copy(), standardize=False, intr=False, 
-                        family='gaussian', lambdau=lambda_a)
+                        family='gaussian', lambdau=lambda_a, 
+                        alpha=alpha_lambda_ratio)
             alpha1 = m_['beta'][:, -1]
         elif glm_impl == 'pyglmnet':
             from pyglmnet import GLM
@@ -69,7 +70,8 @@ def scca_solution(x, y, x_omega, y_omega, alpha0, beta0,
             from glmnet_python import glmnet
             lambda_b = np.array([beta_lambda])
             m_ = glmnet(x=x.copy(), y=y0.copy(), standardize=False, intr=False, 
-                        family='gaussian', lambdau=lambda_b)
+                        family='gaussian', lambdau=lambda_b,
+                        alpha=beta_lambda_ratio)
             beta1 = m_['beta'][:, -1]
         elif glm_impl == 'pyglmnet':
             from pyglmnet import GLM
