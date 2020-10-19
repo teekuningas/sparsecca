@@ -11,7 +11,7 @@ One main difference between these two is that while the first is very simple it 
 
 #### Dependencies
 
-In addition to basic scientific packages such as numpy and scipy, iterative penalized least squares needs either glmnet_python or pyglmnet to be installed.
+In addition to basic scientific packages such as numpy and scipy, iterative penalized least squares needs either glmnet\_python or pyglmnet to be installed.
 
 #### This package can be installed normally with
 git clone https://github.com/Teekuningas/sparsecca.git  
@@ -20,7 +20,7 @@ python setup.py install
 
 ### Usage
 
-See examples.
+See examples, https://teekuningas.github.io/sparsecca
 
 ### Acknowledgements
 
