@@ -20,7 +20,7 @@ from sparsecca import multicca_pmd
 from sparsecca import pmd
 
 # %% 
-# Simulate correlated datasets
+# Simulate correlated datasets so that 1st and 2nd variable of X dataset are correlated with 2nd, 3rd and 4th variables of the Z dataset.
 
 # For consistency
 rand_state = np.random.RandomState(15)
