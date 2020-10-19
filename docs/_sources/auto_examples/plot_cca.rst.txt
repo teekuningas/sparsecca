@@ -1,0 +1,338 @@
+.. only:: html
+
+    .. note::
+        :class: sphx-glr-download-link-note
+
+        Click :ref:`here <sphx_glr_download_auto_examples_plot_cca.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_auto_examples_plot_cca.py:
+
+Different CCA methods
+=====================
+
+Exempliefies different CCA methods
+
+Import necessary libraries.
+
+
+.. code-block:: default
+
+
+    import numpy as np
+    from numpy.linalg import svd
+    from statsmodels.multivariate.cancorr import CanCorr
+
+    from sparsecca import cca_ipls
+    from sparsecca import cca_pmd
+    from sparsecca import multicca_pmd
+    from sparsecca import pmd
+
+
+
+
+
+
+
+
+Simulate correlated datasets so that 1st and 2nd variable of X dataset are correlated with 2nd, 3rd and 4th variables of the Z dataset.
+
+
+.. code-block:: default
+
+
+    # For consistency
+    rand_state = np.random.RandomState(15)
+
+    # Simulate correlated datasets
+    u_ = np.concatenate([np.ones(125), np.zeros(375)])
+    v1 = np.concatenate([np.ones(2), np.zeros(4)])
+    v2 = np.concatenate([np.zeros(1), np.ones(3), np.zeros(1)])
+    X = u_[:, np.newaxis] @ v1[np.newaxis, :] + rand_state.randn(500*6).reshape(500, 6)
+    Z = u_[:, np.newaxis] @ v2[np.newaxis, :] + rand_state.randn(500*5).reshape(500, 5)
+
+    # standardize
+    X = (X - np.mean(X, axis=0)) / np.std(X, axis=0)
+    Z = (Z - np.mean(Z, axis=0)) / np.std(Z, axis=0)
+
+
+
+
+
+
+
+
+Define function for printing weights
+
+
+.. code-block:: default
+
+    def print_weights(name, weights):
+        first = weights[:, 0]
+        print(name + ': ' + ', '.join(['{:.3f}'.format(item) for item in first / np.max(first)]))
+
+
+
+
+
+
+
+
+First, let's try CanCorr function from statsmodels package.
+
+
+.. code-block:: default
+
+
+    stats_cca = CanCorr(Z, X)
+
+    print(stats_cca.corr_test().summary())
+    print_weights('X', stats_cca.x_cancoef)
+    print_weights('Z', stats_cca.y_cancoef)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+                               Cancorr results
+    ======================================================================
+      Canonical Correlation Wilks' lambda  Num DF   Den DF  F Value Pr > F
+    ----------------------------------------------------------------------
+    0                0.2839        0.8939 30.0000 1962.0000  1.8594 0.0032
+    1                0.1161        0.9723 20.0000 1629.4126  0.6934 0.8362
+    2                0.0944        0.9856 12.0000 1302.0011  0.5974 0.8457
+    3                0.0564        0.9944  6.0000  986.0000  0.4585 0.8392
+    4                0.0488        0.9976  2.0000  494.0000  0.5897 0.5549
+    ----------------------------------------------------------------------
+                                                                      
+    ----------------------------------------------------------------------
+    Multivariate Statistics and F Approximations                          
+    ------------------------------------------------------------------------
+                             Value     Num DF     Den DF    F Value   Pr > F
+    ------------------------------------------------------------------------
+    Wilks' lambda            0.8939   30.0000   1958.0000    1.8556   0.0033
+    Pillai's trace           0.1086   30.0000   2465.0000    1.8237   0.0041
+    Hotelling-Lawley trace   0.1159   30.0000   1292.9312    1.8846   0.0028
+    Roy's greatest root      0.0877    6.0000    493.0000    7.2028   0.0000
+    ======================================================================
+
+    X: 1.000, 0.887, 0.378, -0.081, 0.118, -0.279
+    Z: 0.029, 0.837, 1.000, 0.593, -0.066
+
+
+
+
+Next, use CCA algorithm from Witten et al.
+
+
+.. code-block:: default
+
+
+    U, V, D = cca_pmd(X, Z, penaltyx=1.0, penaltyz=1.0, K=2, standardize=False)
+
+    x_weights = U[:, 0]
+    z_weights = V[:, 0]
+    corrcoef = np.corrcoef(np.dot(x_weights, X.T), np.dot(z_weights, Z.T))[0, 1]
+    print("Corrcoef for comp 1: " + str(corrcoef))
+
+    print_weights('X', U)
+    print_weights('Z', V)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Corrcoef for comp 1: 0.28163703141217766
+    X: -3.520, -3.205, -0.777, 0.119, -0.312, 1.000
+    Z: -0.319, -12.652, -14.360, -10.534, 1.000
+
+
+
+
+As the CCA algorithm in Witten et al is faster version of 
+computing SVD of X.T @ Z, try that.
+
+
+.. code-block:: default
+
+
+    U, D, V = svd(X.T @ Z)
+
+    x_weights = U[:, 0]
+    z_weights = V[0, :]
+    corrcoef = np.corrcoef(np.dot(x_weights, X.T), np.dot(z_weights, Z.T))[0, 1]
+    print("Corrcoef for comp 1: " + str(corrcoef))
+
+    print_weights('X', U)
+    print_weights('V', V.T)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Corrcoef for comp 1: 0.2816370314121775
+    X: -3.520, -3.205, -0.777, 0.119, -0.312, 1.000
+    V: -0.319, -12.652, -14.360, -10.534, 1.000
+
+
+
+
+The novelty in Witten et al is developing matrix decomposition similar
+to SVD, but which allows to add convex penalties (here lasso).
+Using that to X.T @ Z without penalty results to same as above.
+
+
+.. code-block:: default
+
+
+    U, V, D = pmd(X.T @ Z, K=2, penaltyu=1.0, penaltyv=1.0, standardize=False)
+
+    x_weights = U[:, 0]
+    z_weights = V[:, 0]
+    corrcoef = np.corrcoef(np.dot(x_weights, X.T), np.dot(z_weights, Z.T))[0, 1]
+    print("Corrcoef for comp 1: " + str(corrcoef))
+
+    print_weights('X', U)
+    print_weights('Z', V)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Corrcoef for comp 1: 0.2816370314121776
+    X: -3.520, -3.205, -0.777, 0.119, -0.312, 1.000
+    Z: -0.319, -12.652, -14.360, -10.534, 1.000
+
+
+
+
+However, when you add penalties, you get a sparse version of CCA.
+
+
+.. code-block:: default
+
+
+    U, V, D = pmd(X.T @ Z, K=2, penaltyu=0.9, penaltyv=0.9, standardize=False)
+
+    x_weights = U[:, 0]
+    z_weights = V[:, 0]
+    corrcoef = np.corrcoef(np.dot(x_weights, X.T), np.dot(z_weights, Z.T))[0, 1]
+    print("Corrcoef for comp 1: " + str(corrcoef))
+
+    print_weights('X', U)
+    print_weights('Z', V)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Corrcoef for comp 1: 0.2816370314121776
+    X: -3.520, -3.205, -0.777, 0.119, -0.312, 1.000
+    Z: -0.319, -12.652, -14.360, -10.534, 1.000
+
+
+
+
+PMD is really fantastically simple and powerful idea, and as seen, 
+can be used to implement sparse CCA. However, for SVD(X.T @ Z) to be 
+equivalent to CCA, cov(X) and cov(Z) should be diagonal,
+which can sometimes give problems. Another CCA algorithm allowing convex penalties
+that does not require cov(X) and cov(Z) to be diagonal, was presented in 
+Mai et al (2019). It is based on iterative least squares formulation, and as it is
+solved with GLM, it allows elastic net -like weighting of L1 and L2 -norms for 
+both datasets separately.
+
+
+.. code-block:: default
+
+
+    X_weights, Z_weights = cca_ipls(X, Z, alpha_lambda=0.0, beta_lambda=0.0, standardize=False,
+                                    n_pairs=2, glm_impl='glmnet_python')
+
+    x_weights = X_weights[:, 0]
+    z_weights = Z_weights[:, 0]
+    corrcoef = np.corrcoef(np.dot(x_weights, X.T), np.dot(z_weights, Z.T))[0, 1]
+    print("Corrcoef for comp 1: " + str(corrcoef))
+
+    print_weights("X", X_weights)
+    print_weights("Z", Z_weights)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Corrcoef for comp 1: 0.2838944381997917
+    X: 1.000, 0.887, 0.378, -0.081, 0.118, -0.279
+    Z: 0.029, 0.837, 1.000, 0.593, -0.066
+
+
+
+
+
+.. rst-class:: sphx-glr-timing
+
+   **Total running time of the script:** ( 0 minutes  0.486 seconds)
+
+
+.. _sphx_glr_download_auto_examples_plot_cca.py:
+
+
+.. only :: html
+
+ .. container:: sphx-glr-footer
+    :class: sphx-glr-footer-example
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-python
+
+     :download:`Download Python source code: plot_cca.py <plot_cca.py>`
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+     :download:`Download Jupyter notebook: plot_cca.ipynb <plot_cca.ipynb>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

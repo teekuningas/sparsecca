@@ -1,0 +1,288 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Different CCA methods &#8212; sparsecca  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-dataframe.css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-plot-cca-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="different-cca-methods">
+<span id="sphx-glr-auto-examples-plot-cca-py"></span><h1>Different CCA methods<a class="headerlink" href="#different-cca-methods" title="Permalink to this headline">¶</a></h1>
+<p>Exempliefies different CCA methods</p>
+<p>Import necessary libraries.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">svd</span>
+<span class="kn">from</span> <span class="nn">statsmodels.multivariate.cancorr</span> <span class="kn">import</span> <span class="n">CanCorr</span>
+
+<span class="kn">from</span> <span class="nn">sparsecca</span> <span class="kn">import</span> <span class="n">cca_ipls</span>
+<span class="kn">from</span> <span class="nn">sparsecca</span> <span class="kn">import</span> <span class="n">cca_pmd</span>
+<span class="kn">from</span> <span class="nn">sparsecca</span> <span class="kn">import</span> <span class="n">multicca_pmd</span>
+<span class="kn">from</span> <span class="nn">sparsecca</span> <span class="kn">import</span> <span class="n">pmd</span>
+</pre></div>
+</div>
+<p>Simulate correlated datasets so that 1st and 2nd variable of X dataset are correlated with 2nd, 3rd and 4th variables of the Z dataset.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># For consistency</span>
+<span class="n">rand_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+
+<span class="c1"># Simulate correlated datasets</span>
+<span class="n">u_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">125</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">375</span><span class="p">)])</span>
+<span class="n">v1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">4</span><span class="p">)])</span>
+<span class="n">v2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)])</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">u_</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">@</span> <span class="n">v1</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">rand_state</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">500</span><span class="o">*</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="n">u_</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">@</span> <span class="n">v2</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">rand_state</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">500</span><span class="o">*</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># standardize</span>
+<span class="n">X</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="p">(</span><span class="n">Z</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Define function for printing weights</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">print_weights</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">{:.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">first</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">first</span><span class="p">)]))</span>
+</pre></div>
+</div>
+<p>First, let’s try CanCorr function from statsmodels package.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stats_cca</span> <span class="o">=</span> <span class="n">CanCorr</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">stats_cca</span><span class="o">.</span><span class="n">corr_test</span><span class="p">()</span><span class="o">.</span><span class="n">summary</span><span class="p">())</span>
+<span class="n">print_weights</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">stats_cca</span><span class="o">.</span><span class="n">x_cancoef</span><span class="p">)</span>
+<span class="n">print_weights</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">stats_cca</span><span class="o">.</span><span class="n">y_cancoef</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>                           Cancorr results
+======================================================================
+  Canonical Correlation Wilks&#39; lambda  Num DF   Den DF  F Value Pr &gt; F
+----------------------------------------------------------------------
+0                0.2839        0.8939 30.0000 1962.0000  1.8594 0.0032
+1                0.1161        0.9723 20.0000 1629.4126  0.6934 0.8362
+2                0.0944        0.9856 12.0000 1302.0011  0.5974 0.8457
+3                0.0564        0.9944  6.0000  986.0000  0.4585 0.8392
+4                0.0488        0.9976  2.0000  494.0000  0.5897 0.5549
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+Multivariate Statistics and F Approximations
+------------------------------------------------------------------------
+                         Value     Num DF     Den DF    F Value   Pr &gt; F
+------------------------------------------------------------------------
+Wilks&#39; lambda            0.8939   30.0000   1958.0000    1.8556   0.0033
+Pillai&#39;s trace           0.1086   30.0000   2465.0000    1.8237   0.0041
+Hotelling-Lawley trace   0.1159   30.0000   1292.9312    1.8846   0.0028
+Roy&#39;s greatest root      0.0877    6.0000    493.0000    7.2028   0.0000
+======================================================================
+
+X: 1.000, 0.887, 0.378, -0.081, 0.118, -0.279
+Z: 0.029, 0.837, 1.000, 0.593, -0.066
+</pre></div>
+</div>
+<p>Next, use CCA algorithm from Witten et al.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">cca_pmd</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">penaltyx</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">penaltyz</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">standardize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">x_weights</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">z_weights</span> <span class="o">=</span> <span class="n">V</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">corrcoef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x_weights</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">z_weights</span><span class="p">,</span> <span class="n">Z</span><span class="o">.</span><span class="n">T</span><span class="p">))[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Corrcoef for comp 1: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">corrcoef</span><span class="p">))</span>
+
+<span class="n">print_weights</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+<span class="n">print_weights</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Corrcoef for comp 1: 0.28163703141217766
+X: -3.520, -3.205, -0.777, 0.119, -0.312, 1.000
+Z: -0.319, -12.652, -14.360, -10.534, 1.000
+</pre></div>
+</div>
+<p>As the CCA algorithm in Witten et al is faster version of
+computing SVD of X.T &#64; Z, try that.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">U</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">svd</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Z</span><span class="p">)</span>
+
+<span class="n">x_weights</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">z_weights</span> <span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">corrcoef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x_weights</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">z_weights</span><span class="p">,</span> <span class="n">Z</span><span class="o">.</span><span class="n">T</span><span class="p">))[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Corrcoef for comp 1: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">corrcoef</span><span class="p">))</span>
+
+<span class="n">print_weights</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+<span class="n">print_weights</span><span class="p">(</span><span class="s1">&#39;V&#39;</span><span class="p">,</span> <span class="n">V</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Corrcoef for comp 1: 0.2816370314121775
+X: -3.520, -3.205, -0.777, 0.119, -0.312, 1.000
+V: -0.319, -12.652, -14.360, -10.534, 1.000
+</pre></div>
+</div>
+<p>The novelty in Witten et al is developing matrix decomposition similar
+to SVD, but which allows to add convex penalties (here lasso).
+Using that to X.T &#64; Z without penalty results to same as above.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">pmd</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Z</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">penaltyu</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">penaltyv</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">standardize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">x_weights</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">z_weights</span> <span class="o">=</span> <span class="n">V</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">corrcoef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x_weights</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">z_weights</span><span class="p">,</span> <span class="n">Z</span><span class="o">.</span><span class="n">T</span><span class="p">))[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Corrcoef for comp 1: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">corrcoef</span><span class="p">))</span>
+
+<span class="n">print_weights</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+<span class="n">print_weights</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Corrcoef for comp 1: 0.2816370314121776
+X: -3.520, -3.205, -0.777, 0.119, -0.312, 1.000
+Z: -0.319, -12.652, -14.360, -10.534, 1.000
+</pre></div>
+</div>
+<p>However, when you add penalties, you get a sparse version of CCA.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">pmd</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Z</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">penaltyu</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">penaltyv</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">standardize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">x_weights</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">z_weights</span> <span class="o">=</span> <span class="n">V</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">corrcoef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x_weights</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">z_weights</span><span class="p">,</span> <span class="n">Z</span><span class="o">.</span><span class="n">T</span><span class="p">))[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Corrcoef for comp 1: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">corrcoef</span><span class="p">))</span>
+
+<span class="n">print_weights</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+<span class="n">print_weights</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Corrcoef for comp 1: 0.2816370314121776
+X: -3.520, -3.205, -0.777, 0.119, -0.312, 1.000
+Z: -0.319, -12.652, -14.360, -10.534, 1.000
+</pre></div>
+</div>
+<p>PMD is really fantastically simple and powerful idea, and as seen,
+can be used to implement sparse CCA. However, for SVD(X.T &#64; Z) to be
+equivalent to CCA, cov(X) and cov(Z) should be diagonal,
+which can sometimes give problems. Another CCA algorithm allowing convex penalties
+that does not require cov(X) and cov(Z) to be diagonal, was presented in
+Mai et al (2019). It is based on iterative least squares formulation, and as it is
+solved with GLM, it allows elastic net -like weighting of L1 and L2 -norms for
+both datasets separately.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X_weights</span><span class="p">,</span> <span class="n">Z_weights</span> <span class="o">=</span> <span class="n">cca_ipls</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">alpha_lambda</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">beta_lambda</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">standardize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                <span class="n">n_pairs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">glm_impl</span><span class="o">=</span><span class="s1">&#39;glmnet_python&#39;</span><span class="p">)</span>
+
+<span class="n">x_weights</span> <span class="o">=</span> <span class="n">X_weights</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">z_weights</span> <span class="o">=</span> <span class="n">Z_weights</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">corrcoef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x_weights</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">z_weights</span><span class="p">,</span> <span class="n">Z</span><span class="o">.</span><span class="n">T</span><span class="p">))[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Corrcoef for comp 1: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">corrcoef</span><span class="p">))</span>
+
+<span class="n">print_weights</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="n">X_weights</span><span class="p">)</span>
+<span class="n">print_weights</span><span class="p">(</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span> <span class="n">Z_weights</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Corrcoef for comp 1: 0.2838944381997917
+X: 1.000, 0.887, 0.378, -0.081, 0.118, -0.279
+Z: 0.029, 0.837, 1.000, 0.593, -0.066
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.486 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-cca-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/a0d6facd0c94cf838977082deef45010/plot_cca.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_cca.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/035669423b794549941e7f3c364051b6/plot_cca.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_cca.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">sparsecca</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Erkka Heinilä.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/auto_examples/plot_cca.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
