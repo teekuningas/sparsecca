@@ -2,3 +2,4 @@
 git checkout master examples
 cd sphinx
 make html
+
