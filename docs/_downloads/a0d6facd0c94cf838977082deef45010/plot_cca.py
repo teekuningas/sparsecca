@@ -6,10 +6,10 @@ Exempliefies different CCA methods
 
 """
 
-
 # %%
 # Import necessary libraries.
 
+import pandas as pd
 import numpy as np
 from numpy.linalg import svd
 from statsmodels.multivariate.cancorr import CanCorr
@@ -20,27 +20,23 @@ from sparsecca import multicca_pmd
 from sparsecca import pmd
 
 # %% 
-# Simulate correlated datasets so that 1st and 2nd variable of X dataset are correlated with 2nd, 3rd and 4th variables of the Z dataset.
+# Get toy data example from seaborn
 
-# For consistency
-rand_state = np.random.RandomState(15)
+path = "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/penguins.csv"
+df = pd.read_csv(path)
+df = df.dropna()
 
-# Simulate correlated datasets
-u_ = np.concatenate([np.ones(125), np.zeros(375)])
-v1 = np.concatenate([np.ones(2), np.zeros(4)])
-v2 = np.concatenate([np.zeros(1), np.ones(3), np.zeros(1)])
-X = u_[:, np.newaxis] @ v1[np.newaxis, :] + rand_state.randn(500*6).reshape(500, 6)
-Z = u_[:, np.newaxis] @ v2[np.newaxis, :] + rand_state.randn(500*5).reshape(500, 5)
+X = df[['bill_length_mm', 'bill_depth_mm']]
+Z = df[['flipper_length_mm', 'body_mass_g']]
 
-# standardize
-X = (X - np.mean(X, axis=0)) / np.std(X, axis=0)
-Z = (Z - np.mean(Z, axis=0)) / np.std(Z, axis=0)
+X = ((X - np.mean(X)) / np.std(X)).to_numpy()
+Z = ((Z - np.mean(Z)) / np.std(Z)).to_numpy()
 
 # %%
 # Define function for printing weights
 def print_weights(name, weights):
-    first = weights[:, 0]
-    print(name + ': ' + ', '.join(['{:.3f}'.format(item) for item in first / np.max(first)]))
+    first = weights[:, 0] / np.max(np.abs(weights[:, 0]))
+    print(name + ': ' + ', '.join(['{:.3f}'.format(item) for item in first]))
 
 # %%
 # First, let's try CanCorr function from statsmodels package.
@@ -96,7 +92,7 @@ print_weights('Z', V)
 # %%
 # However, when you add penalties, you get a sparse version of CCA.
 
-U, V, D = pmd(X.T @ Z, K=2, penaltyu=0.9, penaltyv=0.9, standardize=False)
+U, V, D = pmd(X.T @ Z, K=2, penaltyu=0.8, penaltyv=0.9, standardize=False)
 
 x_weights = U[:, 0]
 z_weights = V[:, 0]
