@@ -35,7 +35,8 @@ Z = ((Z - np.mean(Z)) / np.std(Z)).to_numpy()
 # %%
 # Define function for printing weights
 def print_weights(name, weights):
-    first = weights[:, 0] / np.max(np.abs(weights[:, 0]))
+    # first = weights[:, 0] / np.max(np.abs(weights[:, 0]))
+    first = weights[:, 0]
     print(name + ': ' + ', '.join(['{:.3f}'.format(item) for item in first]))
 
 # %%
