@@ -84,8 +84,8 @@ def cca(x_, z_, penaltyx=0.9, penaltyz=0.9, K=1, niter=20,
         raise Exception('x and z must have same number of rows')
 
     if standardize:
-        x_ = x_ - np.mean(x_, axis=0)
-        z_ = z_ - np.mean(z_, axis=0)
+        x_ = (x_ - np.mean(x_, axis=0)[np.newaxis, :]) / np.std(x_, axis=0, ddof=1)[np.newaxis, :]
+        z_ = (z_ - np.mean(z_, axis=0)[np.newaxis, :]) / np.std(z_, axis=0, ddof=1)[np.newaxis, :]
 
     if np.abs(np.mean(x_)) > 1e-10 or np.abs(np.mean(z_)) > 1e-10:
         print("Warning, cca was run without first subtracting "
