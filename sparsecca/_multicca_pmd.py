@@ -35,13 +35,16 @@ def update_w(datasets, idx, sumabs, ws, ws_final):
 def multicca(datasets, penalties, niter=25, K=1, standardize=True):
     """
     """
+    datasets = datasets.copy()
     for data in datasets:
         if data.shape[1] < 2:
             raise Exception('Need at least 2 features in each datset')
 
     if standardize:
         for idx in range(len(datasets)):
-            datasets[idx] = datasets[idx] - np.mean(datasets[idx], axis=0)
+            centered = datasets[idx] - np.mean(datasets[idx], axis=0)
+            scaled = centered/centered.std(axis=0, ddof=1)
+            datasets[idx] = scaled
 
     ws = []
     for idx in range(len(datasets)):
