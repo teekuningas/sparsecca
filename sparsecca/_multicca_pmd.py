@@ -33,16 +33,34 @@ def update_w(datasets, idx, sumabs, ws, ws_final):
 
 
 def multicca(datasets, penalties, niter=25, K=1, standardize=True):
-    """
+    """Re-implementation of the MultiCCA function from R package PMA.
+
+    Params
+    ------
+    datasets
+    penalties
+    niter : int (default: 25)
+    K : int (default: 1)
+    standardize : bool (default: True)
+        Whether to center and scale each dataset before computing sparse
+        canonical variates.
+
+    Returns
+    -------
+    ws : list
+        List of arrays of shape (datasets.shape[1], K) corresponding to the
+        sparse canonical variates per dataset.
     """
     datasets = datasets.copy()
     for data in datasets:
         if data.shape[1] < 2:
-            raise Exception('Need at least 2 features in each datset')
+            raise Exception('Need at least 2 features in each dataset')
 
     if standardize:
         for idx in range(len(datasets)):
             centered = datasets[idx] - np.mean(datasets[idx], axis=0)
+            # to replicate the R implentation of scale, we apply Bessel's
+            # correction when calculating the standard deviation in numpy
             scaled = centered/centered.std(axis=0, ddof=1)
             datasets[idx] = scaled
 
