@@ -16,7 +16,7 @@ In addition to basic scientific packages such as numpy and scipy, iterative pena
 #### This package can be installed normally with
 git clone https://github.com/Teekuningas/sparsecca.git  
 cd sparsecca  
-python setup.py install
+pip install -e .
 
 ### Usage
 
