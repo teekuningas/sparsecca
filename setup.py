@@ -11,5 +11,8 @@ setup(
     keywords='pma cca pmd sparse svd',
     install_requires=[
         'setuptools',
+        'pandas',
+        'numpy',
+        'statsmodels'
     ],
 )
