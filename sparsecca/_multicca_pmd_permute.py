@@ -1,5 +1,6 @@
 import numpy as np
 from ._multicca_pmd import multicca
+from ._utils_pmd import scale
 
 
 def multicca_permute(
@@ -24,8 +25,8 @@ def multicca_permute(
     for k in range(K):
         if datasets[k].shape[0] < 2:
             raise ValueError('Need at least 2 features in each data set!')
-    if standardize:
-        datasets[k] = datasets[k]  # TODO: standardise
+        if standardize:
+            datasets[k] = scale(datasets[k], center=True, scale=True)
 
     penalties = np.zeros(shape=(K, 10))
 
