@@ -70,7 +70,7 @@ def multicca(datasets, penalties, niter=25, K=1, standardize=True):
 
     sumabs = []
     for idx, penalty in enumerate(penalties):
-        sumabs.append(penalty*np.sqrt(datasets[idx].shape[1]))
+        sumabs.append(penalty)#*np.sqrt(datasets[idx].shape[1]))
 
     ws_init = ws
 
