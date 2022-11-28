@@ -112,5 +112,5 @@ def multicca(datasets, penalties, niter=25, K=1, standardize=True, mimic_R=True)
         for idx in range((len(datasets))):
             ws_final[idx][:, comp_idx] = ws[idx]
 
-    return ws_final
+    return ws_final, ws_init
 
