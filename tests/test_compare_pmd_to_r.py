@@ -3,7 +3,7 @@ import rpy2.robjects as robjects
 
 import numpy as np
 
-from sparsecca._cca_pmd import cca 
+from sparsecca._cca_pmd import cca
 
 
 def test_compare_pmd_to_r():
@@ -15,7 +15,7 @@ def test_compare_pmd_to_r():
 
     utils = rpackages.importr('utils')
     utils.chooseCRANmirror(ind=1)
-    
+
     if not rpackages.isinstalled('PMA'):
         utils.install_packages('PMA', verbose=True)
 
@@ -49,10 +49,11 @@ def test_compare_pmd_to_r():
     z = np.array(robjects.globalenv['z'])
 
     # Compute cca with the same data as in
-    u,v,d = cca(x, z, penaltyx=0.3, penaltyz=0.3, K=3, niter=15)
+    u, v, d = cca(x, z, penaltyx=0.3, penaltyz=0.3, K=3, niter=15)
 
-    assert(np.allclose(np.abs(u),np.abs(out_u)))
-    assert(np.allclose(np.abs(v),np.abs(out_v)))
+    assert (np.allclose(np.abs(u), np.abs(out_u)))
+    assert (np.allclose(np.abs(v), np.abs(out_v)))
+
 
 if __name__ == '__main__':
     test_compare_pmd_to_r()
