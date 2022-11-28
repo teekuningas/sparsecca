@@ -1,0 +1,14 @@
+name: sparsecca
+channels:
+  - conda-forge
+dependencies:
+  - python<=3.9
+  - jupyterlab
+  - ipykernel
+  # sparsecca dependencies
+  - pandas
+  - numpy
+  - statsmodels
+  - pip
+  - pip:
+    - git+https://github.com/theislab/sparsecca.git
