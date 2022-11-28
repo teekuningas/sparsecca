@@ -88,8 +88,6 @@ def get_cors(datasets, ws):
         for j in range(i):
             x = np.ravel(datasets[i] @ ws[i])
             y = np.ravel(datasets[j] @ ws[j])
-            print('x', x)
-            print('y', y)
             cor = np.corrcoef(x, y)
             cors.append(cor[0, 1])
     return sum(cors)
