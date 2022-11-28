@@ -1,9 +1,7 @@
 import numpy as np
 from scipy.linalg import svd
 
-from ._utils_pmd import soft
-from ._utils_pmd import l2n
-from ._utils_pmd import binary_search
+from ._utils_pmd import binary_search, l2n, soft, scale
 
 
 def get_crit(datasets, ws):
@@ -61,15 +59,10 @@ def multicca(datasets, penalties, niter=25, K=1, standardize=True, mimic_R=True)
 
     if standardize:
         for idx in range(len(datasets)):
-            centered = datasets[idx] - np.mean(datasets[idx], axis=0)
-            # to replicate the R implentation of scale, we apply Bessel's
-            # correction when calculating the standard deviation in numpy
-            scaled = centered/centered.std(axis=0, ddof=1)
-
             if mimic_R:
-                datasets[idx] = scaled
+                datasets[idx] = scale(datasets[idx], center=True, scale=True)
             else:
-                datasets[idx] = centered
+                datasets[idx] = scale(datasets[idx], center=True, scale=False)
 
     ws = []
     for idx in range(len(datasets)):
