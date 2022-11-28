@@ -32,7 +32,7 @@ def update_w(datasets, idx, sumabs, ws, ws_final):
         return w_
 
 
-def multicca(datasets, penalties, niter=25, K=1, standardize=True):
+def multicca(datasets, penalties, niter=25, K=1, standardize=True, mimic_R=True):
     """Re-implementation of the MultiCCA function from R package PMA.
 
     Params
@@ -44,6 +44,9 @@ def multicca(datasets, penalties, niter=25, K=1, standardize=True):
     standardize : bool (default: True)
         Whether to center and scale each dataset before computing sparse
         canonical variates.
+    mimic_R : bool (default: True)
+        Whether to mimic the R implementation exactly. Note that this flag can
+        significantly change the resulting values.
 
     Returns
     -------
@@ -62,7 +65,11 @@ def multicca(datasets, penalties, niter=25, K=1, standardize=True):
             # to replicate the R implentation of scale, we apply Bessel's
             # correction when calculating the standard deviation in numpy
             scaled = centered/centered.std(axis=0, ddof=1)
-            datasets[idx] = scaled
+
+            if mimic_R:
+                datasets[idx] = scaled
+            else:
+                datasets[idx] = centered
 
     ws = []
     for idx in range(len(datasets)):
@@ -70,7 +77,10 @@ def multicca(datasets, penalties, niter=25, K=1, standardize=True):
 
     sumabs = []
     for idx, penalty in enumerate(penalties):
-        sumabs.append(penalty)#*np.sqrt(datasets[idx].shape[1]))
+        if mimic_R:
+            sumabs.append(penalty)
+        else:
+            sumabs.append(penalty*np.sqrt(datasets[idx].shape[1]))
 
     ws_init = ws
 
