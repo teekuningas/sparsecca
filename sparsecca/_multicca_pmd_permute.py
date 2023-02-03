@@ -5,6 +5,7 @@ from ._utils_pmd import scale
 
 def multicca_permute(
         datasets: list,
+        penalties: int = None,
         nperms: int = 10,
         niter: int = 3,
         standardize: bool = True,
@@ -15,7 +16,7 @@ def multicca_permute(
 
      Params
     ------
-    datasets
+    datasets: list of datasets
     niter : int (default: 3)
     standardize : bool (default: True)
         Whether to center and scale each dataset before computing sparse
@@ -28,12 +29,15 @@ def multicca_permute(
         if standardize:
             datasets[k] = scale(datasets[k], center=True, scale=True)
 
-    penalties = np.zeros(shape=(K, 10))
-
-    for k in range(K):
-        n_cols = datasets[k].shape[1]
-        vals = np.linspace(start=.1, stop=.8, num=10) * np.sqrt(n_cols)
-        penalties[k, :] = [np.max([v, 1.1]) for v in vals]
+    if penalties is None:
+        # only "standard" mode
+        penalties = np.zeros(shape=(K, 10))
+        for k in range(K):
+            n_cols = datasets[k].shape[1]
+            vals = np.linspace(start=.1, stop=.8, num=10) * np.sqrt(n_cols)
+            penalties[k, :] = [np.max([v, 1.1]) for v in vals]
+    else:
+        penalties = np.full(shape=(K, 1), fill_value=penalties)
 
     penalty_columns = penalties.shape[1]
     cors = np.zeros(shape=penalty_columns)
