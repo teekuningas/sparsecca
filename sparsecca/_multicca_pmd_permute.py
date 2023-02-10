@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 from ._multicca_pmd import multicca
 from ._utils_pmd import scale
@@ -22,6 +23,7 @@ def multicca_permute(
         Whether to center and scale each dataset before computing sparse
         canonical variates.
     """
+    datasets = copy.deepcopy(datasets)
     K = len(datasets)
     for k in range(K):
         if datasets[k].shape[0] < 2:
