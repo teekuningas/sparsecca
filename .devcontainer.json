@@ -1,0 +1,15 @@
+{
+  "name": "gobi-sparsecca",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "containerUser": "mambauser",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+}

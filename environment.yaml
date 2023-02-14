@@ -6,6 +6,8 @@ dependencies:
   - jupyterlab
   - ipykernel
   # sparsecca dependencies
+  - rpy2
+  - pytest
   - pandas
   - numpy
   - statsmodels
