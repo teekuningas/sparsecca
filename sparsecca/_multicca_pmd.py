@@ -1,7 +1,11 @@
 import numpy as np
-from scipy.linalg import svd
 
-from ._utils_pmd import binary_search, l2n, soft, scale
+from ._utils_pmd import (
+    binary_search,
+    l2n,
+    soft,
+    scale,
+)
 
 
 def get_crit(datasets, ws):
@@ -21,13 +25,16 @@ def update_w(datasets, idx, sumabs, ws, ws_final):
                 if a != b:
                     diagmat[a, b] = 0
 
-        tots = (tots + datasets[idx].T @ datasets[jj] @ ws[jj] -
-                ws_final[idx] @ diagmat @ ws_final[jj].T @ ws[jj])
+        tots = (
+            tots
+            + datasets[idx].T @ datasets[jj] @ ws[jj]
+            - ws_final[idx] @ diagmat @ ws_final[jj].T @ ws[jj]
+        )
 
-        sumabs = binary_search(tots, sumabs)
-        w_ = soft(tots, sumabs) / l2n(soft(tots, sumabs))
+    sumabs = binary_search(tots, sumabs)
+    w_ = soft(tots, sumabs) / l2n(soft(tots, sumabs))
 
-        return w_
+    return w_
 
 
 def multicca(datasets, penalties, niter=25, K=1, standardize=True, mimic_R=True):
@@ -55,7 +62,7 @@ def multicca(datasets, penalties, niter=25, K=1, standardize=True, mimic_R=True)
     datasets = datasets.copy()
     for data in datasets:
         if data.shape[1] < 2:
-            raise Exception('Need at least 2 features in each dataset')
+            raise Exception("Need at least 2 features in each dataset")
 
     if standardize:
         for idx in range(len(datasets)):
@@ -66,14 +73,14 @@ def multicca(datasets, penalties, niter=25, K=1, standardize=True, mimic_R=True)
 
     ws = []
     for idx in range(len(datasets)):
-        ws.append(svd(datasets[idx])[2][0:K].T)
+        ws.append(np.linalg.svd(datasets[idx])[2][0:K].T)
 
     sumabs = []
     for idx, penalty in enumerate(penalties):
         if mimic_R:
             sumabs.append(penalty)
         else:
-            sumabs.append(penalty*np.sqrt(datasets[idx].shape[1]))
+            sumabs.append(penalty * np.sqrt(datasets[idx].shape[1]))
 
     ws_init = ws
 
@@ -91,9 +98,11 @@ def multicca(datasets, penalties, niter=25, K=1, standardize=True, mimic_R=True)
         crit = -20
         storecrits = []
 
-        while (curiter < niter and 
-               np.abs(crit_old - crit) / np.abs(crit_old) > 0.001 and
-               crit_old != 0):
+        while (
+            curiter < niter
+            and np.abs(crit_old - crit) / np.abs(crit_old) > 0.001
+            and crit_old != 0
+        ):
             crit_old = crit
             crit = get_crit(datasets, ws)
 
@@ -106,4 +115,3 @@ def multicca(datasets, penalties, niter=25, K=1, standardize=True, mimic_R=True)
             ws_final[idx][:, comp_idx] = ws[idx]
 
     return ws_final, ws_init
-
