@@ -1,4 +1,4 @@
-from .._utils_pmd import l2n, soft, scale, svd, binary_search
+from .._utils_pmd import l2n, soft, scale, binary_search
 
 import numpy as np
 from rpy2 import robjects
@@ -25,25 +25,6 @@ def test_l2n():
     b = l2n(vec_b)
     b_r = r_l2n(numpy2rpy(vec_b))
     assert np.allclose(b, b_r, rtol=1e-10)
-
-
-def test_svd():
-    r_svd = robjects.r(
-        """
-        function(x) {
-            res = svd(x)
-            return(list(res$u, res$d, res$v))
-        }
-        """
-    )
-
-    x = np.array([[1, 2], [3, 4]])
-    U, s, V = svd(x)
-    U_r, s_r, V_r = r_svd(numpy2rpy(x))
-
-    assert np.allclose(U, U_r, rtol=1e-6)
-    assert np.allclose(s, s_r, rtol=1e-6)
-    assert np.allclose(V.T, V_r, rtol=1e-6)
 
 
 def test_binary_search():
