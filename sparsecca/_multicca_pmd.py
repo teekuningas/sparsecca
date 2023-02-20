@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.linalg import svd
 
 from ._utils_pmd import (
     binary_search,
@@ -73,7 +74,7 @@ def multicca(datasets, penalties, niter=25, K=1, standardize=True, mimic_R=True)
 
     ws = []
     for idx in range(len(datasets)):
-        ws.append(np.linalg.svd(datasets[idx])[2][0:K].T)
+        ws.append(svd(datasets[idx])[2][0:K].T)
 
     sumabs = []
     for idx, penalty in enumerate(penalties):
