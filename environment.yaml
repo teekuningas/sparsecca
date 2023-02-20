@@ -3,14 +3,15 @@ channels:
   - conda-forge
 dependencies:
   - python<=3.9
-  - jupyterlab
-  - ipykernel
-  # sparsecca dependencies
-  - rpy2
-  - pytest
   - pandas
   - numpy
   - statsmodels
+  # developer dependencies
+  - rpy2
+  - r-base=4
+  - r-data.table
+  - r-pma
+  - pytest
   - pip
   - pip:
     - git+https://github.com/theislab/sparsecca.git
