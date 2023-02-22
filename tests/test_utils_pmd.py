@@ -1,4 +1,4 @@
-from .._utils_pmd import l2n, soft, scale, binary_search
+from sparsecca import l2n, soft, scale, binary_search
 
 import numpy as np
 from rpy2 import robjects

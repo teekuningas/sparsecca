@@ -7,7 +7,7 @@ from rpy2 import robjects
 import rpy2.robjects.packages as rpackages
 from rpy2.robjects.numpy2ri import numpy2rpy
 
-from .._multicca_pmd_permute import multicca_permute
+from sparsecca import multicca_permute
 
 utils = rpackages.importr("utils")
 utils.chooseCRANmirror(ind=1)
@@ -47,8 +47,8 @@ def test_multicca_permute():
 
 def test_compare_multicca_permute_to_r():
     datasets = [
-        pd.read_csv("sparsecca/tests/data/multicca1.csv", sep=",", index_col=0).values,
-        pd.read_csv("sparsecca/tests/data/multicca2.csv", sep=",", index_col=0).values,
+        pd.read_csv("tests/data/multicca1.csv", sep=",", index_col=0).values,
+        pd.read_csv("tests/data/multicca2.csv", sep=",", index_col=0).values,
     ]
 
     datasets_r = [numpy2rpy(dataset) for dataset in datasets]

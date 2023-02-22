@@ -12,12 +12,12 @@ RUN set -ex \
 
 USER $MAMBA_USER
 
-COPY --chown=$MAMBA_USER:$MAMBA_USER environment.yaml /tmp/environment.yaml
+COPY --chown=$MAMBA_USER:$MAMBA_USER environment.yml /tmp/environment.yml
 
-RUN micromamba install -y -n base -f /tmp/environment.yaml && \
+RUN micromamba install -y -n base -f /tmp/environment.yml && \
     micromamba clean --all --yes
 
+# Install black & sparsecca
 RUN source /usr/local/bin/_activate_current_env.sh && \
     pip install black && \
-    R -e "install.packages(c('languageserver', 'PMA'), repos = 'https://cloud.r-project.org/')"
-
+    pip install .

@@ -3,7 +3,7 @@ import rpy2.robjects as robjects
 
 import numpy as np
 
-from .._cca_pmd import cca
+from sparsecca import cca_pmd
 
 
 def test_compare_pmd_to_r():
@@ -51,7 +51,7 @@ def test_compare_pmd_to_r():
     z = np.array(robjects.globalenv["z"])
 
     # Compute cca with the same data as in
-    u, v, d = cca(x, z, penaltyx=0.3, penaltyz=0.3, K=3, niter=15)
+    u, v, d = cca_pmd(x, z, penaltyx=0.3, penaltyz=0.3, K=3, niter=15)
 
     assert np.allclose(np.abs(u), np.abs(out_u))
     assert np.allclose(np.abs(v), np.abs(out_v))

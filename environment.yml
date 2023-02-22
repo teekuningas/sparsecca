@@ -1,8 +1,9 @@
 name: sparsecca
 channels:
   - conda-forge
+  - bioconda
 dependencies:
-  - python<=3.9
+  - python=3.10
   - pandas
   - numpy
   - statsmodels
@@ -13,5 +14,3 @@ dependencies:
   - r-pma
   - pytest
   - pip
-  - pip:
-    - git+https://github.com/theislab/sparsecca.git
