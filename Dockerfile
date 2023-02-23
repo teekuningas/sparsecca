@@ -7,7 +7,11 @@ RUN set -ex \
     curl \
     git \
     bash-completion \
-    r-base
+    r-base \
+    gcc \
+    libglpk-dev \
+    coinor-libipopt-dev \
+    glpk-utils
 
 
 USER $MAMBA_USER

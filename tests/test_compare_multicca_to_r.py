@@ -145,10 +145,3 @@ def test_compare_multicca_to_r_3datasets_unequal_feature_length():
 
     for i in range(len(r_ws)):
         assert np.allclose(ws[i], np.array(r_ws[i]), rtol=1e-10)
-
-
-if __name__ == "__main__":
-    test_compare_multicca_to_r_2datasets_equal_feature_length()
-    test_compare_multicca_to_r_3datasets_equal_feature_length()
-    test_compare_multicca_to_r_2datasets_unequal_feature_length()
-    test_compare_multicca_to_r_3datasets_unequal_feature_length()

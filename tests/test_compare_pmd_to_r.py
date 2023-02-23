@@ -55,7 +55,3 @@ def test_compare_pmd_to_r():
 
     assert np.allclose(np.abs(u), np.abs(out_u))
     assert np.allclose(np.abs(v), np.abs(out_v))
-
-
-if __name__ == "__main__":
-    test_compare_pmd_to_r()

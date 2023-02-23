@@ -43,10 +43,13 @@ def multicca(datasets, penalties, niter=25, K=1, standardize=True, mimic_R=True)
 
     Params
     ------
-    datasets
-    penalties
+    datasets : list
+        List of n matrices of shape (samples x features)
+    penalties : list
+        List of n (1 x features) vectors. `c` in Witten 2009
     niter : int (default: 25)
     K : int (default: 1)
+        Number of latent factors to calculate.
     standardize : bool (default: True)
         Whether to center and scale each dataset before computing sparse
         canonical variates.
