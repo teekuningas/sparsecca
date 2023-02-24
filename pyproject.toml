@@ -23,7 +23,8 @@ dependencies = [
     "pandas",
     "numpy",
     "statsmodels",
-    "pyomo"
+    "pyomo",
+    "ipopt"
 ]
 
 [project.optional-dependencies]
