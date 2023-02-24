@@ -91,8 +91,6 @@ def _update_w_lp(datasets, penalties, ws_init):
     res = nonLinearOpt.solve(instance_non_linear)
     model.solutions.load_from(res)
     
-    instance_non_linear.display()
-    
     from collections import defaultdict
     w = defaultdict(list)
     for i in model.N:
