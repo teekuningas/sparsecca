@@ -22,7 +22,8 @@ maintainers = [
 dependencies = [
     "pandas",
     "numpy",
-    "statsmodels"
+    "statsmodels",
+    "pyomo"
 ]
 
 [project.optional-dependencies]
